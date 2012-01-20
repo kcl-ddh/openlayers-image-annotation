@@ -16,15 +16,24 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 	this.imageWidth = imageWidth;
 	this.imageHeight = imageHeight;
 
+	var maxExtent = new OpenLayers.Bounds(0, 0, this.imageWidth,
+			this.imageHeight);
+
 	// creates a new OpenLayers map
-	this.map = new OpenLayers.Map('map');
+	this.map = new OpenLayers.Map('map', {
+		maxExtent : maxExtent,
+		projection : 'EPSG:3785',
+		units : 'm'
+	});
 
 	// creates a new OpenLayers.Layer to display the image being annotated
 	this.imageLayer = new OpenLayers.Layer.Image('Image', this.imageUrl,
-			new OpenLayers.Bounds(0, 0, this.imageWidth, this.imageHeight),
-			new OpenLayers.Size(this.imageWidth / 7, this.imageHeight / 7, {
-				numZoomLevels : 3
-			}));
+			maxExtent, new OpenLayers.Size(this.imageWidth / 7,
+					this.imageHeight / 7, {
+						isBaseLayer : true,
+						numZoomLevels : 3,
+						ratio : 1.0
+					}));
 
 	// adds the image layer to the map
 	this.map.addLayer(this.imageLayer);
@@ -55,6 +64,7 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 
 	// creates a new OpenLayers.Layer to draw and render vectors
 	this.vectorLayer = new OpenLayers.Layer.Vector('Vector', {
+		maxExtent : maxExtent,
 		strategies : [ new OpenLayers.Strategy.Save() ],
 		styleMap : styleMap
 	});
@@ -121,13 +131,12 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 			});
 
 	// creates a transform feature
-	this.transformFeature = new TransformFeature(
-			this.vectorLayer, {
-				renderIntent : 'transform',
-				irregular : true,
-				displayClass : 'olControlTransformFeature',
-				title : 'Transform'
-			});
+	this.transformFeature = new TransformFeature(this.vectorLayer, {
+		renderIntent : 'transform',
+		irregular : true,
+		displayClass : 'olControlTransformFeature',
+		title : 'Transform'
+	});
 	this.transformFeature.events.on({
 		'transformcomplete' : function(e) {
 			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
