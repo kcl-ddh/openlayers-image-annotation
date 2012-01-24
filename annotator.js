@@ -80,6 +80,7 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 		},
 		'featuremodified' : function(e) {
 			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
+			_self.selectFeatureById(e.feature.id);
 		}
 	});
 
@@ -140,6 +141,7 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 	this.transformFeature.events.on({
 		'transformcomplete' : function(e) {
 			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
+			_self.selectFeatureById(e.feature.id);
 		}
 	});
 
