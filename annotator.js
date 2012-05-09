@@ -72,11 +72,10 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 	// turns events on the vector layer to detect when a feature is selected
 	this.vectorLayer.events.on({
 		'featureselected' : function(e) {
-			_self.selectedFeature = e.feature;
-			_self.showAnnotation(e.feature);
+			_self.onFeatureSelect(e);
 		},
 		'featureunselected' : function(e) {
-			_self.selectedFeature = null;
+			_self.onFeatureUnSelect(e);
 		},
 		'featuremodified' : function(e) {
 			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
@@ -231,12 +230,34 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 	}
 	this.vectorLayer.onFeatureInsert = function(feature) {
 		_self.selectFeatureById(feature.id);
+		//_self.selectFeature.unselect(feature);
 	}
 }
 
 Annotator.SAVED = 1;
 Annotator.SAVED_ATTRIBUTE = 'saved';
 Annotator.UNSAVED = 0;
+
+/**
+ * Function that is called after a feature is selected.
+ *
+ * @param event
+ *            The select event.
+ */
+Annotator.prototype.onFeatureSelect = function(event) {
+	this.selectedFeature = event.feature;
+	this.showAnnotation(event.feature);
+}
+
+/**
+ * Function that is called after a feature is unselected.
+ * 
+ * @param event
+ *            The unselect event.
+ */
+Annotator.prototype.onFeatureUnSelect = function(event) {
+	this.selectedFeature = null;
+}
 
 /**
  * Shows the annotation details for the given feature.
