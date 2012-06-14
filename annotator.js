@@ -2,13 +2,19 @@
  * Class to control the Annotations with OpenLayers.
  * 
  * @param imageUrl
- *            URL of the image to annotate.
+ *						URL of the image to annotate.
  * @param imageWidth
- *            Width of the image to annotate.
+ *						Width of the image to annotate.
  * @param imageHeight
- *            Height of the image to annotate.
+ *						Height of the image to annotate.
+ * @param isZoomify
+ *						Indicates if the imageUrl refers to a zoomify URL.
  */
-function Annotator(imageUrl, imageWidth, imageHeight) {
+function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
+	if (!imageUrl) {
+			return;
+	}
+
 	// to make it accessible when 'this' loses scope
 	var _self = this;
 
@@ -19,23 +25,32 @@ function Annotator(imageUrl, imageWidth, imageHeight) {
 	var maxExtent = new OpenLayers.Bounds(0, 0, this.imageWidth,
 			this.imageHeight);
 
+	if (isZoomify) {
+			// creates a new ZoomifyLayer for the image being annotated
+			this.imageLayer = new OpenLayers.Layer.Zoomify('Zoomify', imageUrl,
+					new OpenLayers.Size(this.imageWidth, this.imageHeight),
+					{isBaseLayer : true});
+	} else {
+			// creates a new ImageLayer to display the image being annotated
+			this.imageLayer = new OpenLayers.Layer.Image('Image', this.imageUrl,
+					maxExtent, new OpenLayers.Size(this.imageWidth / 7,
+							this.imageHeight / 7, {
+								isBaseLayer : true,
+								numZoomLevels : 3,
+								ratio : 1.0
+							}));
+	}
+
 	// creates a new OpenLayers map
 	this.map = new OpenLayers.Map('map', {
 		maxExtent : maxExtent,
+		maxResolution: Math.pow(2, this.imageLayer.numberOfTiers - 1),
+		numZoomLevels : this.imageLayer.numberOfTiers,
 		projection : 'EPSG:3785',
 		units : 'm'
 	});
 
-	// creates a new OpenLayers.Layer to display the image being annotated
-	this.imageLayer = new OpenLayers.Layer.Image('Image', this.imageUrl,
-			maxExtent, new OpenLayers.Size(this.imageWidth / 7,
-					this.imageHeight / 7, {
-						isBaseLayer : true,
-						numZoomLevels : 3,
-						ratio : 1.0
-					}));
-
-	// adds the image layer to the map
+	//// adds the image layer to the map
 	this.map.addLayer(this.imageLayer);
 
 	// creates a StyleMap
@@ -242,7 +257,7 @@ Annotator.UNSAVED = 0;
  * Function that is called after a feature is selected.
  *
  * @param event
- *            The select event.
+ *						The select event.
  */
 Annotator.prototype.onFeatureSelect = function(event) {
 	this.selectedFeature = event.feature;
@@ -253,7 +268,7 @@ Annotator.prototype.onFeatureSelect = function(event) {
  * Function that is called after a feature is unselected.
  * 
  * @param event
- *            The unselect event.
+ *						The unselect event.
  */
 Annotator.prototype.onFeatureUnSelect = function(event) {
 	this.selectedFeature = null;
@@ -263,7 +278,7 @@ Annotator.prototype.onFeatureUnSelect = function(event) {
  * Shows the annotation details for the given feature.
  * 
  * @param feature
- *            The feature to display the annotation.
+ *						The feature to display the annotation.
  */
 Annotator.prototype.showAnnotation = function(feature) {
 }
@@ -273,9 +288,9 @@ Annotator.prototype.showAnnotation = function(feature) {
  * 
  * @abstract
  * @param layer
- *            The feature's layer.
+ *						The feature's layer.
  * @param feature
- *            The feature to delete the annotation for.
+ *						The feature to delete the annotation for.
  */
 Annotator.prototype.deleteAnnotation = function(layer, feature) {
 }
@@ -314,7 +329,7 @@ Annotator.prototype.activateKeyboardShortcuts = function(event) {
  * Selects a feature by ID.
  * 
  * @param featureId
- *            The id of the feature to select.
+ *						The id of the feature to select.
  */
 Annotator.prototype.selectFeatureById = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
@@ -325,7 +340,7 @@ Annotator.prototype.selectFeatureById = function(featureId) {
  * Selects a feature by ID and centres on the feature.
  * 
  * @param featureId
- *            The id of the feature to select.
+ *						The id of the feature to select.
  */
 Annotator.prototype.selectFeatureByIdAndCentre = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
@@ -337,7 +352,7 @@ Annotator.prototype.selectFeatureByIdAndCentre = function(featureId) {
  * Selects a feature by ID and zooms to the feature extent.
  * 
  * @param featureId
- *            The id of the feature to select.
+ *						The id of the feature to select.
  */
 Annotator.prototype.selectFeatureByIdAndZoom = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
@@ -349,7 +364,7 @@ Annotator.prototype.selectFeatureByIdAndZoom = function(featureId) {
  * Returns the saved attribute for the given feature.
  * 
  * @param feature
- *            The value of the saved attribute.
+ *						The value of the saved attribute.
  */
 Annotator.prototype.getSavedAttribute = function(feature) {
 	var attribute = Annotator.SAVED_ATTRIBUTE;
@@ -362,11 +377,11 @@ Annotator.prototype.getSavedAttribute = function(feature) {
  * the layer will redraw the feature.
  * 
  * @param feature
- *            The feature to update.
+ *						The feature to update.
  * @param saved
- *            The value for the saved attribute.
+ *						The value for the saved attribute.
  * @param redraw
- *            Whether the layer should redraw the feature.
+ *						Whether the layer should redraw the feature.
  */
 Annotator.prototype.setSavedAttribute = function(feature, saved, redraw) {
 	var attribute = Annotator.SAVED_ATTRIBUTE;
