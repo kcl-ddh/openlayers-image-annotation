@@ -104,13 +104,6 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 	// creates a new format to serialize/deserialize the vectors as GeoJSON
 	this.format = new OpenLayers.Format.GeoJSON();
 
-	// creates a new panel for all the tools
-	this.toolbarPanel = new OpenLayers.Control.Panel({
-		allowDepress : true,
-		type : OpenLayers.Control.TYPE_TOGGLE,
-		displayClass : 'olControlEditingToolbar'
-	});
-
 	// OpenLayers Control to delete features
 	DeleteFeature = OpenLayers.Class(OpenLayers.Control, {
 		initialize : function(layer, options) {
@@ -219,14 +212,7 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 		displayClass : 'olControlSaveFeatures'
 	});
 
-	// adds all the control features to the toolbar panel
-	this.toolbarPanel.addControls([ this.deleteFeature, this.modifyFeature,
-			this.transformFeature, this.duplicateFeature, this.polygonFeature,
-			this.rectangleFeature, this.selectFeature, this.dragFeature,
-			this.zoomBoxFeature, this.saveButton ]);
-
-	// sets the default control to be the drag feature
-	this.toolbarPanel.defaultControl = this.dragFeature;
+        this.toolbarPanel = this.createToolbar();
 
 	// adds the toolbar panel to the map
 	this.map.addControl(this.toolbarPanel);
@@ -252,6 +238,26 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 Annotator.SAVED = 1;
 Annotator.SAVED_ATTRIBUTE = 'saved';
 Annotator.UNSAVED = 0;
+
+/**
+ * Create, populate and return a toolbar.
+ */
+Annotator.prototype.createToolbar = function() {
+	var toolbarPanel = new OpenLayers.Control.Panel({
+		allowDepress : true,
+		type : OpenLayers.Control.TYPE_TOGGLE,
+		displayClass : 'olControlEditingToolbar'
+	});
+	// adds all the control features to the toolbar panel
+	toolbarPanel.addControls([ this.deleteFeature, this.modifyFeature,
+			this.transformFeature, this.duplicateFeature, this.polygonFeature,
+			this.rectangleFeature, this.selectFeature, this.dragFeature,
+			this.zoomBoxFeature, this.saveButton ]);
+
+	// sets the default control to be the drag feature
+	toolbarPanel.defaultControl = this.dragFeature;
+        return toolbarPanel;
+};
 
 /**
  * Function that is called after a feature is selected.
