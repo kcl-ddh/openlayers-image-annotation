@@ -104,114 +104,7 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 	// creates a new format to serialize/deserialize the vectors as GeoJSON
 	this.format = new OpenLayers.Format.GeoJSON();
 
-	// OpenLayers Control to delete features
-	DeleteFeature = OpenLayers.Class(OpenLayers.Control, {
-		initialize : function(layer, options) {
-			OpenLayers.Control.prototype.initialize.apply(this, [ options ]);
-			this.layer = layer;
-			this.handler = new OpenLayers.Handler.Feature(this, layer, {
-				click : this.clickFeature
-			});
-		},
-		clickFeature : function(feature) {
-			_self.deleteAnnotation(this.layer, feature);
-		},
-		setMap : function(map) {
-			this.handler.setMap(map);
-			OpenLayers.Control.prototype.setMap.apply(this, arguments);
-		},
-		CLASS_NAME : 'OpenLayers.Control.DeleteFeature'
-	});
-
-	// creates a delete feature
-	this.deleteFeature = new DeleteFeature(this.vectorLayer, {
-		displayClass : 'olControlDeleteFeature',
-		title : 'Delete'
-	});
-
-	// creates a modify feature
-	this.modifyFeature = new OpenLayers.Control.ModifyFeature(this.vectorLayer,
-			{
-				mode : OpenLayers.Control.ModifyFeature.RESHAPE
-						| OpenLayers.Control.ModifyFeature.DRAG,
-				displayClass : 'olControlModifyFeature',
-				title : 'Modify'
-			});
-
-	// creates a transform feature
-	this.transformFeature = new TransformFeature(this.vectorLayer, {
-		renderIntent : 'transform',
-		irregular : true,
-		displayClass : 'olControlTransformFeature',
-		title : 'Transform'
-	});
-	this.transformFeature.events.on({
-		'transformcomplete' : function(e) {
-			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
-			_self.selectFeatureById(e.feature.id);
-		}
-	});
-
-	// creates a duplicate feature
-	this.duplicateFeature = new DuplicateFeature(this.vectorLayer, {
-		displayClass : 'olControlDuplicateFeature',
-		title : 'Duplicate'
-	});
-
-	// creates a polygon feature
-	this.polygonFeature = new OpenLayers.Control.DrawFeature(this.vectorLayer,
-			OpenLayers.Handler.Polygon, {
-				displayClass : 'olControlDrawFeaturePath',
-				title : 'Draw Polygon'
-			});
-
-	// creates a rectangle feature
-	this.rectangleFeature = new OpenLayers.Control.DrawFeature(
-			this.vectorLayer, OpenLayers.Handler.RegularPolygon, {
-				displayClass : 'olControlDrawFeaturePolygon',
-				handlerOptions : {
-					sides : 4,
-					irregular : true
-				},
-				title : 'Draw Rectangle'
-			});
-
-	// creates a select feature
-	this.selectFeature = new OpenLayers.Control.SelectFeature(this.vectorLayer,
-			{
-				displayClass : 'olControlDragFeature',
-				title : 'Select',
-				clickout : true,
-				toggle : false,
-				multiple : false,
-				hover : false,
-				box : false
-			});
-
-	// creates a drag feature
-	this.dragFeature = new OpenLayers.Control.DragFeature(this.vectorLayer, {
-		displayClass : 'olControlSelectFeature',
-		title : 'Drag'
-	});
-	this.dragFeature.onComplete = function(feature, pixel) {
-		_self.setSavedAttribute(feature, Annotator.UNSAVED, true);
-	}
-
-	// creates a zoom box feature
-	this.zoomBoxFeature = new OpenLayers.Control.ZoomBox({
-		alwaysZoom : true,
-		displayClass : 'olControlZoomBox'
-	});
-
-	// creates a button to save features
-	this.saveButton = new OpenLayers.Control.Button({
-		title : 'Save',
-		trigger : function() {
-			_self.saveAnnotation();
-		},
-		displayClass : 'olControlSaveFeatures'
-	});
-
+        this.createControls();
         this.toolbarPanel = this.createToolbar();
 
 	// adds the toolbar panel to the map
@@ -240,7 +133,185 @@ Annotator.SAVED_ATTRIBUTE = 'saved';
 Annotator.UNSAVED = 0;
 
 /**
- * Create, populate and return a toolbar.
+ * Creates Controls.
+ */
+Annotator.prototype.createControls = function() {
+  this.deleteFeature = this.createDeleteFeature();
+  this.modifyFeature = this.createModifyFeature();
+  this.transformFeature = this.createTransformFeature();
+  this.duplicateFeature = this.createDuplicateFeature();
+  this.polygonFeature = this.createPolygonFeature();
+  this.rectangleFeature = this.createRectangleFeature();
+  this.selectFeature = this.createSelectFeature();
+  this.dragFeature = this.createDragFeature();
+  this.zoomBoxFeature = this.createZoomBoxFeature();
+  this.saveButton = this.createSaveButton();
+};
+
+/**
+ * Returns an OpenLayers Control to delete features.
+ */
+Annotator.prototype.createDeleteFeature = function() {
+        var _self = this;
+	DeleteFeature = OpenLayers.Class(OpenLayers.Control, {
+		initialize : function(layer, options) {
+			OpenLayers.Control.prototype.initialize.apply(this, [ options ]);
+			this.layer = layer;
+			this.handler = new OpenLayers.Handler.Feature(this, layer, {
+				click : this.clickFeature
+			});
+		},
+		clickFeature : function(feature) {
+			_self.deleteAnnotation(this.layer, feature);
+		},
+		setMap : function(map) {
+			this.handler.setMap(map);
+			OpenLayers.Control.prototype.setMap.apply(this, arguments);
+		},
+		CLASS_NAME : 'OpenLayers.Control.DeleteFeature'
+	});
+
+	// creates a delete feature
+	var deleteFeature = new DeleteFeature(this.vectorLayer, {
+		displayClass : 'olControlDeleteFeature',
+		title : 'Delete'
+	});
+        return deleteFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to modify features.
+ */
+Annotator.prototype.createModifyFeature = function() {
+	var modifyFeature = new OpenLayers.Control.ModifyFeature(this.vectorLayer,
+			{
+				mode : OpenLayers.Control.ModifyFeature.RESHAPE
+						| OpenLayers.Control.ModifyFeature.DRAG,
+				displayClass : 'olControlModifyFeature',
+				title : 'Modify'
+			});
+        return modifyFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to transform a feature. 
+ */
+Annotator.prototype.createTransformFeature = function() {
+        var _self = this;
+	var transformFeature = new TransformFeature(this.vectorLayer, {
+		renderIntent : 'transform',
+		irregular : true,
+		displayClass : 'olControlTransformFeature',
+		title : 'Transform'
+	});
+	transformFeature.events.on({
+		'transformcomplete' : function(e) {
+			_self.setSavedAttribute(e.feature, Annotator.UNSAVED, true);
+			_self.selectFeatureById(e.feature.id);
+		}
+	});
+        return transformFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to duplicate a feature.
+ */
+Annotator.prototype.createDuplicateFeature = function() {
+	var duplicateFeature = new DuplicateFeature(this.vectorLayer, {
+		displayClass : 'olControlDuplicateFeature',
+		title : 'Duplicate'
+	});
+        return duplicateFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to create a polygon feature.
+ */
+Annotator.prototype.createPolygonFeature = function() {
+	var polygonFeature = new OpenLayers.Control.DrawFeature(this.vectorLayer,
+			OpenLayers.Handler.Polygon, {
+				displayClass : 'olControlDrawFeaturePath',
+				title : 'Draw Polygon'
+			});
+        return polygonFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to create a rectangle feature.
+ */
+Annotator.prototype.createRectangleFeature = function() {
+	var rectangleFeature = new OpenLayers.Control.DrawFeature(
+			this.vectorLayer, OpenLayers.Handler.RegularPolygon, {
+				displayClass : 'olControlDrawFeaturePolygon',
+				handlerOptions : {
+					sides : 4,
+					irregular : true
+				},
+				title : 'Draw Rectangle'
+			});
+        return rectangleFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to select a feature.
+ */
+Annotator.prototype.createSelectFeature = function() {
+	var selectFeature = new OpenLayers.Control.SelectFeature(this.vectorLayer,
+			{
+				displayClass : 'olControlDragFeature',
+				title : 'Select',
+				clickout : true,
+				toggle : false,
+				multiple : false,
+				hover : false,
+				box : false
+			});
+        return selectFeature;
+};
+
+/**
+ * Returns an OpenLayers Control to drag a feature.
+ */
+Annotator.prototype.createDragFeature = function() {
+        var _self = this;
+	var dragFeature = new OpenLayers.Control.DragFeature(this.vectorLayer, {
+		displayClass : 'olControlSelectFeature',
+		title : 'Drag'
+	});
+	dragFeature.onComplete = function(feature, pixel) {
+		_self.setSavedAttribute(feature, Annotator.UNSAVED, true);
+	};
+        return dragFeature;
+};
+
+/**
+ * Returns an OpenLayers Control zoom box.
+ */
+Annotator.prototype.createZoomBoxFeature = function() {
+	var zoomBoxFeature = new OpenLayers.Control.ZoomBox({
+		alwaysZoom : true,
+		displayClass : 'olControlZoomBox'
+	});
+        return zoomBoxFeature;
+};
+
+/**
+ * Returns an OpenLayers Control save button.
+ */
+Annotator.prototype.createSaveButton = function() {
+        var _self = this;
+	var saveButton = new OpenLayers.Control.Button({
+		title : 'Save',
+		trigger : function() {
+			_self.saveAnnotation();
+		},
+		displayClass : 'olControlSaveFeatures'
+	});
+        return saveButton;
+};
+
+/**
+ * Creates, populates and returns a toolbar.
  */
 Annotator.prototype.createToolbar = function() {
 	var toolbarPanel = new OpenLayers.Control.Panel({
