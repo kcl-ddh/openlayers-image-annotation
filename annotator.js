@@ -121,11 +121,11 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 		if (_self.getSavedAttribute(feature) != Annotator.SAVED) {
 			_self.setSavedAttribute(feature, Annotator.UNSAVED, false);
 		}
-	}
+	};
 	this.vectorLayer.onFeatureInsert = function(feature) {
 		_self.selectFeatureById(feature.id);
 		//_self.selectFeature.unselect(feature);
-	}
+	};
 }
 
 Annotator.SAVED = 1;
@@ -339,7 +339,7 @@ Annotator.prototype.createToolbar = function() {
 Annotator.prototype.onFeatureSelect = function(event) {
 	this.selectedFeature = event.feature;
 	this.showAnnotation(event.feature);
-}
+};
 
 /**
  * Function that is called after a feature is unselected.
@@ -349,7 +349,7 @@ Annotator.prototype.onFeatureSelect = function(event) {
  */
 Annotator.prototype.onFeatureUnSelect = function(event) {
 	this.selectedFeature = null;
-}
+};
 
 /**
  * Shows the annotation details for the given feature.
@@ -358,7 +358,7 @@ Annotator.prototype.onFeatureUnSelect = function(event) {
  *						The feature to display the annotation.
  */
 Annotator.prototype.showAnnotation = function(feature) {
-}
+};
 
 /**
  * Deletes the annotation for the selected feature.
@@ -370,7 +370,7 @@ Annotator.prototype.showAnnotation = function(feature) {
  *						The feature to delete the annotation for.
  */
 Annotator.prototype.deleteAnnotation = function(layer, feature) {
-}
+};
 
 /**
  * Saves the selected feature annotation.
@@ -378,7 +378,7 @@ Annotator.prototype.deleteAnnotation = function(layer, feature) {
  * @abstract
  */
 Annotator.prototype.saveAnnotation = function() {
-}
+};
 
 /**
  * Loads existing vectors into a layer.
@@ -386,7 +386,7 @@ Annotator.prototype.saveAnnotation = function() {
  * @abstract
  */
 Annotator.prototype.loadVectors = function() {
-}
+};
 
 /**
  * Loads existing annotations.
@@ -394,13 +394,13 @@ Annotator.prototype.loadVectors = function() {
  * @abstract
  */
 Annotator.prototype.loadAnnotations = function() {
-}
+};
 
 /**
  * Turns on keyboard shortcuts for the controls.
  */
 Annotator.prototype.activateKeyboardShortcuts = function(event) {
-}
+};
 
 /**
  * Selects a feature by ID.
@@ -411,7 +411,7 @@ Annotator.prototype.activateKeyboardShortcuts = function(event) {
 Annotator.prototype.selectFeatureById = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
 	this.selectFeature.clickFeature(feature);
-}
+};
 
 /**
  * Selects a feature by ID and centres on the feature.
@@ -423,7 +423,7 @@ Annotator.prototype.selectFeatureByIdAndCentre = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
 	this.selectFeature.clickFeature(feature);
 	this.map.setCenter(feature.geometry.getBounds().getCenterLonLat());
-}
+};
 
 /**
  * Selects a feature by ID and zooms to the feature extent.
@@ -435,7 +435,7 @@ Annotator.prototype.selectFeatureByIdAndZoom = function(featureId) {
 	var feature = this.vectorLayer.getFeatureById(featureId);
 	this.selectFeature.clickFeature(feature);
 	this.map.zoomToExtent(feature.geometry.getBounds());
-}
+};
 
 /**
  * Returns the saved attribute for the given feature.
@@ -447,7 +447,7 @@ Annotator.prototype.getSavedAttribute = function(feature) {
 	var attribute = Annotator.SAVED_ATTRIBUTE;
 
 	return feature.attributes['saved'];
-}
+};
 
 /**
  * Sets the saved attribute of the feature to the given value. If redraw is true
@@ -469,4 +469,4 @@ Annotator.prototype.setSavedAttribute = function(feature, saved, redraw) {
 	if (redraw) {
 		this.vectorLayer.drawFeature(feature, 'default');
 	}
-}
+};
