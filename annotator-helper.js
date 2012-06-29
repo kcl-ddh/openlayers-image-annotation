@@ -203,5 +203,5 @@ TransformFeature = OpenLayers.Class(OpenLayers.Control.TransformFeature, {
         this.box = box;
         this.rotationHandles = rotationHandles;
         this.handles = handles;
-    },
+    }
 });
