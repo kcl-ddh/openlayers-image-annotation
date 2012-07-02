@@ -110,12 +110,6 @@ function Annotator(imageUrl, imageWidth, imageHeight, isZoomify) {
 	// adds the toolbar panel to the map
 	this.map.addControl(this.toolbarPanel);
 
-	// loads existing vectors into the vector layer
-	this.loadVectors();
-
-	// loads existing annotations
-	this.loadAnnotations();
-
 	// automatically selects a feature after its inserted into the vector layer
 	this.vectorLayer.preFeatureInsert = function(feature) {
 		if (_self.getSavedAttribute(feature) != Annotator.SAVED) {
@@ -378,14 +372,6 @@ Annotator.prototype.deleteAnnotation = function(layer, feature) {
  * @abstract
  */
 Annotator.prototype.saveAnnotation = function() {
-};
-
-/**
- * Loads existing vectors into a layer.
- * 
- * @abstract
- */
-Annotator.prototype.loadVectors = function() {
 };
 
 /**
